@@ -11,7 +11,14 @@ env:
 matrix:
     include:
         - python: 3.5
-          env: GROUP=js
+          env:
+            - GROUP=js
+            - BROWSER=firefox
+        - python: 3.5
+          sudo: required
+          env:
+            - GROUP=js
+            - BROWSER=chrome_travis
 cache:
     pip: true
     directories:
@@ -29,13 +36,15 @@ install:
     - 'if [[ $GROUP == js ]]; then cd ./nbdime-web; fi'
     - 'if [[ $GROUP == js ]]; then npm install; fi'
 before_script:
-    # Set up a virtual screen for Firefox browser testing:
-    - export CHROME_BIN=chromium-browser
+    # Set up a virtual screen for browser testing:
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo apt-get update; fi'
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo apt-get install chromium-browser -y; fi'
+    - 'if [[ $GROUP == js ]]; then export CHROME_BIN=chromium-browser; fi'
     - 'if [[ $GROUP == js ]]; then export DISPLAY=:99.0; fi'
     - 'if [[ $GROUP == js ]]; then sh -e /etc/init.d/xvfb start; fi'
 script:
     - 'if [[ $GROUP == python ]]; then py.test -l --cov-report html --cov=nbdime; fi'
-    - 'if [[ $GROUP == js ]]; then npm test; fi'
+    - 'if [[ $GROUP == js ]]; then npm run test:$BROWSER; fi'
 after_success:
     - 'if [[ $GROUP == js ]]; then cd ..; fi'
     - codecov

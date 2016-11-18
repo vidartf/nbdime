@@ -26,5 +26,12 @@ module.exports = function (config) {
       //'text-summary': null, // to show summary in console
       json: './coverage/remapped.json'
     },
+
+    customLaunchers: {
+      Chrome_travis: {
+        base: 'Chrome',
+        flags: ['--no-sandbox']
+      }
+    }
   });
 };
