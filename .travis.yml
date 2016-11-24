@@ -37,8 +37,8 @@ install:
     - 'if [[ $GROUP == js ]]; then npm install; fi'
 before_script:
     # Set up a virtual screen for browser testing:
-    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb ; fi'
-    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo dpkg -i google-chrome-stable_current_amd64.deb ; fi'
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - && sudo sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'; fi'
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; sudo apt-get update && sudo apt-get install google-chrome-stable; fi'
     - 'if [[ $GROUP == js ]]; then export CHROME_BIN=google-chrome-stable; fi'
     - 'if [[ $GROUP == js ]]; then export DISPLAY=:99.0; fi'
     - 'if [[ $GROUP == js ]]; then sh -e /etc/init.d/xvfb start; fi'
