@@ -37,9 +37,8 @@ install:
     - 'if [[ $GROUP == js ]]; then npm install; fi'
 before_script:
     # Set up a virtual screen for browser testing:
-    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - ; fi'
-    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo sh -c ''echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'' ; fi'
-    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo apt-get update && sudo apt-get install google-chrome-stable; fi'
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo deb http://archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse; fi'
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo apt-get update && sudo apt-get install -t precise-backports google-chrome-stable; fi'
     - 'if [[ $GROUP == js ]]; then export CHROME_BIN=google-chrome-stable; fi'
     - 'if [[ $GROUP == js ]]; then export DISPLAY=:99.0; fi'
     - 'if [[ $GROUP == js ]]; then sh -e /etc/init.d/xvfb start; fi'
