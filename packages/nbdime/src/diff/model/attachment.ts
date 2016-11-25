@@ -61,7 +61,7 @@ class AttachmentDiffModel extends RenderableDiffModel<nbformat.IMimeBundle> {
 /**
  * Function used to create a list of models for a list diff
  *
- * - If base and remote are both non-null and equal, it returns
+ * - If base and remote are both equal, it returns
  *   a list of models representing unchanged entries.
  * - If base and a diff is given, it ignores remote and returns
  *   a list of models representing the diff.
@@ -72,57 +72,57 @@ class AttachmentDiffModel extends RenderableDiffModel<nbformat.IMimeBundle> {
  */
 export
 function makeAttachmentModels(
-      base: nbformat.IAttachments,
-      remote: nbformat.IAttachments,
+      base: nbformat.IAttachments | null | undefined,
+      remote: nbformat.IAttachments | null | undefined,
       diff?: IDiffObjectEntry[] | null) : AttachmentDiffModel[] {
   let models: AttachmentDiffModel[] = [];
-  if (remote === null && !diff) {
-    if (base === null) {
-      throw new Error('Either base or remote need to be specififed!');
-    }
-    // Cell deleted
-    for (let key of Object.keys(base)) {
-      models.push(new AttachmentDiffModel(key, base[key], null));
-    }
-  } else if (base === null) {
-    if (remote === null) {
-      throw new Error('Either base or remote need to be specififed!');
-    }
-    // Cell added
-    for (let key of Object.keys(remote)) {
-      models.push(new AttachmentDiffModel(key, null, remote[key]));
-    }
-  } else if (remote === base) {
-    // All entries unchanged
-    for (let key of Object.keys(base)) {
-      models.push(new AttachmentDiffModel(key, base[key], base[key]));
-    }
-  } else if (diff) {
-    // Entries patched, remote will be null
-    let helper = new PatchObjectHelper(base, diff);
-    each(helper.keys(), key => {
-      if (helper.isDiffKey(key)) {
-        let d = helper.getDiffEntry(key);
-        if (d.op === 'add') {
-          // Entry added
-          models.push(new AttachmentDiffModel(key, null, d.value));
-        } else if (d.op === 'remove') {
-          // Entry deleted
-          models.push(new AttachmentDiffModel(key, base[key], null));
-        } else if (d.op === 'replace') {
-          // Entry replaced
-          models.push(new AttachmentDiffModel(key, base[key], d.value));
-        } else {
-          // Entry patched
-          models.push(new AttachmentDiffModel(key, base[key], null, d.diff));
-        }
-      } else {
-        // Entry unchanged
+  if (remote === base) {
+    if (base) {
+      // All entries unchanged
+      for (let key of Object.keys(base)) {
         models.push(new AttachmentDiffModel(key, base[key], base[key]));
       }
-    });
+    } // otherwise, leave models empty
   } else {
-    throw new Error('Invalid arguments to makeOutputModels()');
+    if (base && diff) {
+      // Entries patched, remote will be null
+      let helper = new PatchObjectHelper(base, diff);
+      each(helper.keys(), key => {
+        if (helper.isDiffKey(key)) {
+          let d = helper.getDiffEntry(key);
+          if (d.op === 'add') {
+            // Entry added
+            models.push(new AttachmentDiffModel(key, null, d.value));
+          } else if (d.op === 'remove') {
+            // Entry deleted
+            models.push(new AttachmentDiffModel(key, base[key], null));
+          } else if (d.op === 'replace') {
+            // Entry replaced
+            models.push(new AttachmentDiffModel(key, base[key], d.value));
+          } else {
+            // Entry patched
+            models.push(new AttachmentDiffModel(key, base[key], null, d.diff));
+          }
+        } else {
+          // Entry unchanged
+          models.push(new AttachmentDiffModel(key, base[key], base[key]));
+        }
+      });
+    } else if (remote === null) {
+      // Cell deleted
+      if (base !== undefined) {
+        for (let key of Object.keys(base)) {
+          models.push(new AttachmentDiffModel(key, base![key], null));
+        }
+      }
+    } else if (base === null) {
+      // Cell added
+      if (remote !== undefined) {
+        for (let key of Object.keys(remote)) {
+          models.push(new AttachmentDiffModel(key, null, remote![key]));
+        }
+      }
+    }
   }
   return models;
 }
