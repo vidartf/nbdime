@@ -28,6 +28,10 @@ import {
 } from './string';
 
 import {
+  AttachmentDiffModel, makeAttachmentModels
+} from './attachment';
+
+import {
   OutputDiffModel, makeOutputModels
 } from './output';
 
@@ -45,11 +49,13 @@ export class CellDiffModel {
               metadata: IStringDiffModel,
               outputs: OutputDiffModel[] | null,
               executionCount: ImmutableDiffModel | null,
+              attachments: AttachmentDiffModel[] | null,
               cellType: string) {
     this.source = source;
     this.metadata = metadata;
     this.outputs = outputs;
     this.executionCount = executionCount;
+    this.attachments = attachments;
     this.cellType = cellType;
     if (outputs === null && cellType === 'code') {
       throw new NotifyUserError('Invalid code cell, missing outputs!');
@@ -86,6 +92,13 @@ export class CellDiffModel {
   executionCount: ImmutableDiffModel | null;
 
   /**
+   * Diff model for the attachments field. can be null.
+   *
+   * A null value signifies that the cell is a code cell type.
+   */
+  attachments: AttachmentDiffModel[] | null;
+
+  /**
    * The type of the notebook cell
    */
   cellType: string;
@@ -106,6 +119,11 @@ export class CellDiffModel {
     if (this.executionCount) {
       // TODO: Ignore if option 'ignore minor' set?
       unchanged = unchanged && this.executionCount.unchanged;
+    }
+    if (this.attachments) {
+      for (let a of this.attachments) {
+        unchanged = unchanged && a.unchanged;
+      }
     }
     return unchanged;
   }
@@ -166,6 +184,7 @@ function createPatchedCellDiffModel(
   let metadata: StringDiffModel | null = null;
   let outputs: OutputDiffModel[] | null = null;
   let executionCount: ImmutableDiffModel | null = null;
+  let attachments: AttachmentDiffModel[] | null = null;
 
   let subDiff = getSubDiffByKey(diff, 'source');
   if (subDiff) {
@@ -196,8 +215,19 @@ function createPatchedCellDiffModel(
     let execDiff = getDiffEntryByKey(diff, 'execution_count') as IDiffReplace | null;
     // Pass base as remote, which means fall back to unchanged if no diff:
     executionCount = createImmutableModel(execBase, execBase, execDiff);
+  } else {  // markdown or raw cell
+    // TODO: Update typing once `nbformat` is corrected
+    let attachmentsBase = (base as any).attachments as nbformat.IAttachments | null | undefined;
+    let attachmentsDiff = getSubDiffByKey(diff, 'attachments') as IDiffObjectEntry[];
+    if (attachmentsDiff) {
+      // Patched
+      attachments = makeAttachmentModels(attachmentsBase, null, attachmentsDiff);
+    } else {
+      // Unchanged
+      attachments = makeAttachmentModels(attachmentsBase, attachmentsBase);
+    }
   }
-  return new CellDiffModel(source, metadata, outputs, executionCount, base.cell_type);
+  return new CellDiffModel(source, metadata, outputs, executionCount, attachments, base.cell_type);
 }
 
 export
@@ -208,6 +238,7 @@ function createUnchangedCellDiffModel(
   let metadata = createDirectStringDiffModel(base.metadata as JSONObject, base.metadata as JSONObject);
   let outputs: OutputDiffModel[] | null = null;
   let executionCount: ImmutableDiffModel | null = null;
+  let attachments: AttachmentDiffModel[] | null = null;
 
   if (nbformat.isCode(base)) {
     outputs = makeOutputModels(base.outputs,
@@ -215,9 +246,10 @@ function createUnchangedCellDiffModel(
     let execBase = base.execution_count;
     executionCount = createImmutableModel(execBase, execBase);
   } else {  // markdown or raw cell
-
+    let attachmentsBase = (base as any).attachments as nbformat.IAttachments | null | undefined;
+    attachments = makeAttachmentModels(attachmentsBase, attachmentsBase);
   }
-  return new CellDiffModel(source, metadata, outputs, executionCount, base.cell_type);
+  return new CellDiffModel(source, metadata, outputs, executionCount, attachments, base.cell_type);
 }
 
 export
@@ -228,12 +260,15 @@ function createAddedCellDiffModel(
   let metadata = createDirectStringDiffModel(null, remote.metadata as JSONObject);
   let outputs: OutputDiffModel[] | null = null;
   let executionCount: ImmutableDiffModel | null = null;
+  let attachments: AttachmentDiffModel[] | null = null;
   if (nbformat.isCode(remote)) {
     outputs = makeOutputModels(
       null, remote.outputs);
     executionCount = createImmutableModel(null, remote.execution_count);
+  } else {
+    attachments = makeAttachmentModels(null, (remote as any).attachments);
   }
-  return new CellDiffModel(source, metadata, outputs, executionCount, remote.cell_type);
+  return new CellDiffModel(source, metadata, outputs, executionCount, attachments, remote.cell_type);
 }
 
 export
@@ -244,10 +279,14 @@ function createDeletedCellDiffModel(
   let metadata = createDirectStringDiffModel(base.metadata as JSONObject, null);
   let outputs: OutputDiffModel[] | null = null;
   let executionCount: ImmutableDiffModel | null = null;
+  let attachments: AttachmentDiffModel[] | null = null;
   if (nbformat.isCode(base)) {
     outputs = makeOutputModels(base.outputs, null);
     let execBase = base.execution_count;
     executionCount = createImmutableModel(execBase, null);
+  } else {
+    let attachmentsBase = (base as any).attachments as nbformat.IAttachments | null | undefined;
+    attachments = makeAttachmentModels(attachmentsBase, null);
   }
-  return new CellDiffModel(source, metadata, outputs, executionCount, base.cell_type);
+  return new CellDiffModel(source, metadata, outputs, executionCount, attachments, base.cell_type);
 }

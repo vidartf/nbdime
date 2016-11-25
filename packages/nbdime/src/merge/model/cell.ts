@@ -12,6 +12,7 @@ import {
 
 import {
   IDiffAddRange, IDiffEntry, IDiffArrayEntry,
+  IDiffObjectEntry,
   IDiffPatchObject, IDiffImmutableObjectEntry
 } from '../../diff/diffentries';
 
@@ -24,7 +25,8 @@ import {
   createAddedCellDiffModel, createDeletedCellDiffModel,
   createPatchedCellDiffModel, createUnchangedCellDiffModel,
   OutputDiffModel, makeOutputModels, ImmutableDiffModel,
-  setMimetypeFromCellType, createImmutableModel
+  setMimetypeFromCellType, createImmutableModel,
+  AttachmentDiffModel, makeAttachmentModels
 } from '../../diff/model';
 
 import {
@@ -88,6 +90,8 @@ function createPatchedCellDecisionDiffModel(
 
   let outputs: OutputDiffModel[] | null = null;
   let executionCount: ImmutableDiffModel | null = null;
+  let attachments: AttachmentDiffModel[] | null = null;
+  let cellDecs = filterDecisions(decisions, ['cells'], 0, 2);
   if (nbformat.isCode(base)) {
     if (base.outputs) {
       let outputBase = base.outputs;
@@ -102,22 +106,66 @@ function createPatchedCellDecisionDiffModel(
       outputs = makeOutputModels(outputBase, merged, mergedDiff);
     }
     let execBase = base.execution_count;
-    let cellDecs = filterDecisions(decisions, ['cells'], 0, 2);
+    let execDiff: IDiffImmutableObjectEntry | null = null;
     for (let dec of cellDecs) {
       if (getDiffEntryByKey(dec.localDiff, 'execution_count') !== null ||
           getDiffEntryByKey(dec.remoteDiff, 'execution_count') !== null ||
           getDiffEntryByKey(dec.customDiff, 'execution_count') !== null) {
         dec.level = 2;
         let mergeExecDiff = buildDiffs(base, [dec], 'merged') as IDiffImmutableObjectEntry[] | null;
-        let execDiff = hasEntries(mergeExecDiff) ? mergeExecDiff[0] : null;
-        // Pass base as remote, which means fall back to unchanged if no diff:
-        executionCount = createImmutableModel(execBase, execBase, execDiff);
+        execDiff = hasEntries(mergeExecDiff) ? mergeExecDiff[0] : null;
       }
     }
-
+    // Pass base as remote, which means fall back to unchanged if no diff:
+    executionCount = createImmutableModel(execBase, execBase, execDiff);
+  } else {  // base.cell_type is raw or markdown
+    let attachmentsBase = (base as any).attachments as nbformat.IAttachments | null | undefined;
+    // Three possible events:
+    // 1. Attachment field added/removed/replaced (decision on cell level)
+    // 2. Attachment field patched
+    // 3. Unchanged
+    let attachmentDecs = filterDecisions(decisions, ['attachments'], 2);
+    if (attachmentDecs.length === 0) {
+      // Implies 1. or 3., should be 0 or 1 decisions on field
+      let attachmentsDiff: IDiffObjectEntry | null = null;
+      for (let dec of cellDecs) {
+        if (getDiffEntryByKey(dec.localDiff, 'attachments') !== null ||
+            getDiffEntryByKey(dec.remoteDiff, 'attachments') !== null ||
+            getDiffEntryByKey(dec.customDiff, 'attachments') !== null) {
+          // Found a decision, 1.
+          dec.level = 2;
+          let d = buildDiffs(base, [dec], 'merged');
+          attachmentsDiff = hasEntries(d) ? d[0] as IDiffObjectEntry : null;
+          break;
+        }
+      }
+      if (attachmentsDiff) {
+        // 1. add/remove/replace
+        if (attachmentsDiff.op === 'remove') {
+          attachments = makeAttachmentModels(attachmentsBase || null, null);
+        } else if (attachmentsDiff.op !== 'patch')  {
+          attachments = makeAttachmentModels(attachmentsBase || null,
+            attachmentsDiff.value);
+        } else {
+          throw new Error('Invalid diff op');
+        }
+      } else {
+        // 3. Unchanged
+        attachments = makeAttachmentModels(
+          attachmentsBase || null, attachmentsBase || null);
+      }
+    } else {
+      // Implies 2., patched
+      if (!attachmentsBase) {
+        throw new Error('Cannot patch missing base!');
+      }
+      let attachmentsDiff = buildDiffs(
+        attachmentsBase, attachmentDecs, 'merged') as IDiffObjectEntry[] | null;
+      attachments = makeAttachmentModels(attachmentsBase, null, attachmentsDiff);
+    }
   }
 
-  return new CellDiffModel(source, metadata, outputs, executionCount, base.cell_type);
+  return new CellDiffModel(source, metadata, outputs, executionCount, attachments, base.cell_type);
 }
 
 
@@ -128,7 +176,7 @@ export
 class CellMergeModel extends ObjectMergeModel<nbformat.ICell, CellDiffModel> {
   constructor(base: nbformat.ICell | null, decisions: MergeDecision[], mimetype: string) {
     // TODO: Remove/extend whitelist once we support more
-    super(base, [], mimetype, ['source', 'metadata', 'outputs', 'execution_count']);
+    super(base, [], mimetype, ['source', 'metadata', 'outputs', 'execution_count', 'attachments']);
     this.onesided = false;
     this._deleteCell = false;
     this.processDecisions(decisions);
