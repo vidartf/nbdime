@@ -37,8 +37,8 @@ install:
     - 'if [[ $GROUP == js ]]; then npm install; fi'
 before_script:
     - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu precise-backports main restricted universe multiverse"; fi'
-    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo apt-get update && sudo apt-get install -t precise-backports google-chrome-stable; fi'
-    - 'if [[ $GROUP == js ]]; then export CHROME_BIN=google-chrome-stable; fi'
+    - 'if [[ $GROUP == js && $BROWSER == chrome_travis ]]; then sudo apt-get update && sudo apt-get install -t precise-backports chromium-browser; fi'
+    - 'if [[ $GROUP == js ]]; then export CHROME_BIN=chromium-browser; fi'
     - 'if [[ $GROUP == js ]]; then export DISPLAY=:99.0; fi'
     - 'if [[ $GROUP == js ]]; then sh -e /etc/init.d/xvfb start; fi'
 script:
