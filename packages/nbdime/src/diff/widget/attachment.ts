@@ -3,12 +3,12 @@
 'use strict';
 
 import {
-  IRenderMime
-} from 'jupyterlab/lib/rendermime';
+  nbformat
+} from '@jupyterlab/services';
 
 import {
-  nbformat
-} from 'jupyterlab/lib/notebook/notebook/nbformat';
+  IRenderMime
+} from 'jupyterlab/lib/rendermime';
 
 import {
   Widget
@@ -32,7 +32,7 @@ const HEIGHT_LARGEST_CLASS = 'mod-height-largest';
  * Widget for outputs with renderable MIME data.
  */
 export
-class AttachmentView extends RenderableDiffView<nbformat.MimeBundle> {
+class AttachmentView extends RenderableDiffView<nbformat.IMimeBundle> {
   constructor(model: AttachmentDiffModel,
               editorClass: string[],
               rendermime: IRenderMime) {
@@ -45,7 +45,7 @@ class AttachmentView extends RenderableDiffView<nbformat.MimeBundle> {
    * sanitizable)
    */
   static canRenderUntrusted(model: AttachmentDiffModel): boolean {
-    let toTest: nbformat.MimeBundle[] = [];
+    let toTest: nbformat.IMimeBundle[] = [];
     if (model.base) {
       toTest.push(model.base);
     }
@@ -95,14 +95,14 @@ class AttachmentView extends RenderableDiffView<nbformat.MimeBundle> {
         img.classList.add(WIDTH_LARGEST_CLASS);
       }
       label.innerHTML = meta;
-      img.parentNode.appendChild(label);
+      img.parentNode!.appendChild(label);
     }
   }
 
   /**
    * Create a widget which renders the given cell output
    */
-  protected createSubView(bundle: nbformat.MimeBundle, trusted: boolean): Widget {
+  protected createSubView(bundle: nbformat.IMimeBundle, trusted: boolean): Widget {
     let widget = this._rendermime.render({
       bundle: convertBundle(bundle),
       trusted
