@@ -220,8 +220,8 @@ class CellMergeWidget extends Panel {
         this.addWidget(container);
       }
     } else {
-      // Setup full 4-way mergeview of source, metadata and outputs
-      // as needed (if changed). Source/metadata/output are each a "row"
+      // Setup full 4-way mergeview of source, metadata, outputs and attachments
+      // as needed (if changed). Source/attachments/metadata/output are each a "row"
       let execDec = model.getExecutionCountDecision();
       if (execDec && execDec.action === 'clear') {
         let row = new FlexPanel({direction: 'left-to-right'});
@@ -262,7 +262,7 @@ class CellMergeWidget extends Panel {
         metadataChanged = metadataChanged || (
           !!m.metadata && !m.metadata.unchanged);
 
-        if (m.outputs && m.outputs.length > 0) {
+        if (hasEntries(m.outputs)) {
           for (let o of m.outputs) {
             outputsChanged = outputsChanged || !o.unchanged;
           }
