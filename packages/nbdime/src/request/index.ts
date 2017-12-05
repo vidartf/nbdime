@@ -7,12 +7,9 @@ import {
 } from '@phosphor/coreutils';
 
 import {
-  URLExt
-} from '@jupyterlab/coreutils/lib/url';
+  URLExt, PageConfig
+} from '@jupyterlab/coreutils';
 
-import {
-  ServerConnection
-} from '@jupyterlab/services';
 
 function urlRStrip(target: string): string {
   if (target.slice(-1) === '/') {
@@ -22,18 +19,49 @@ function urlRStrip(target: string): string {
 }
 
 /**
+ * Get a cookie from the document.
+ */
+function getCookie(name: string) {
+  // from tornado docs: http://www.tornadoweb.org/en/stable/guide/security.html
+  let r = document.cookie.match('\\b' + name + '=([^;]*)\\b');
+  return r ? r[1] : void 0;
+}
+
+function getToken(): string | null {
+  let jlToken = PageConfig.getOption('token');
+  return jlToken;
+}
+
+function createAuthorizedRequest(url: string, init: RequestInit): Request {
+  let request = new Request(url, init);
+  let token = getToken();
+  if (token) {
+    request.headers.append('Authorization', `token ${token}`);
+  } else if (typeof document !== 'undefined' && document.cookie) {
+    let xsrfToken = getCookie('_xsrf');
+    if (xsrfToken !== void 0) {
+      request.headers.append('X-XSRFToken', xsrfToken);
+    }
+  }
+  return request;
+}
+
+/**
  * Make a POST request passing a JSON argument and receiving a JSON result.
  */
 export
 function requestJsonPromise(url: string, argument: any): Promise<JSONObject> {
-  let request = {
-      url: url,
-      method: 'POST',
-      data: JSON.stringify(argument),
-    };
-  let settings = ServerConnection.makeSettings();
-  return ServerConnection.makeRequest(request, settings).then((response) => {
-      return response.data;
+  let request = createAuthorizedRequest(url, {
+    method: 'POST',
+    body: JSON.stringify(argument),
+    credentials: 'same-origin',
+    cache: 'no-cache',
+  });
+  return fetch(request).then((response) => {
+      if (!response.ok) {
+        throw new Error(`Invalid response: ${response.status} ${response.statusText}`)
+      }
+      return response.json();
     });
 }
 
@@ -45,8 +73,8 @@ function requestJson(url: string, argument: any, callback: (result: any) => void
   let promise = requestJsonPromise(url, argument);
   promise.then((data) => {
     callback(data);
-  }, (error: ServerConnection.IError) => {
-    onError(error.xhr.responseText);
+  }, (error: Error) => {
+    onError(error.message);
   });
 }
 
