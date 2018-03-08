@@ -38,8 +38,10 @@
     }
   },
   "scripts": {
-    "clean": "rimraf lib",
-    "build": "tsc --project src",
+    "clean": "rimraf lib && rimraf dist",
+    "build": "npm run build:lib && npm run build:labextension",
+    "build:lib": "tsc --project src",
+    "build:labextension": "rimraf dist && mkdirp dist && cd dist && npm pack ..",
     "update": "rimraf node_modules/nbdime && npm install && npm run build"
   },
   "repository": {
