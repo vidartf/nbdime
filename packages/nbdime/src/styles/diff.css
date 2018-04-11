@@ -45,11 +45,13 @@
 
 
 .jp-Notebook-diff .jp-Diff-added .jp-Cellrow-source,
+.jp-Notebook-diff .jp-Diff-added .jp-Cellrow-attachments,
 .jp-Notebook-diff .jp-Diff-added .jp-Cellrow-outputs {
   border-left: var(--codemirror-border);
 }
 
 .jp-Notebook-diff .jp-Diff-deleted .jp-Cellrow-source,
+.jp-Notebook-diff .jp-Diff-deleted .jp-Cellrow-attachments,
 .jp-Notebook-diff .jp-Diff-deleted .jp-Cellrow-outputs {
   border-right: var(--codemirror-border);
 }
@@ -85,6 +87,8 @@
   display: none;
 }
 
+.jp-Notebook-diff .jp-Diff-added .jp-Cellrow-attachments,
+.jp-Notebook-diff .jp-Diff-deleted .jp-Cellrow-attachments,
 .jp-Notebook-diff .jp-Diff-added .jp-Cellrow-outputs,
 .jp-Notebook-diff .jp-Diff-deleted .jp-Cellrow-outputs {
   border-top: var(--jp-nbdime-output-color1) solid 1pt;
@@ -106,11 +110,13 @@
   margin-right: auto;
 }
 
+.jp-Notebook-diff .jp-Cellrow-attachments .jp-Diff-twoway .jp-Diff-base,
 .jp-Notebook-diff .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-base {
   float: left;
   width: 47%;
 }
 
+.jp-Notebook-diff .jp-Cellrow-attachments .jp-Diff-twoway .jp-Diff-remote,
 .jp-Notebook-diff .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-remote {
   float: right;
   width: 47%;
@@ -154,12 +160,14 @@
 
 
 .jp-Notebook-diff .jp-Diff-deleted .CodeMirror,
+.jp-Notebook-diff .jp-Diff-deleted .jp-Diff-attachment,
 .jp-Notebook-diff .jp-Diff-deleted .jp-Diff-renderedOuput,
 .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-base {
   background-color: var(--jp-diff-deleted-color2);
 }
 
 .jp-Notebook-diff .jp-Diff-added .CodeMirror,
+.jp-Notebook-diff .jp-Diff-added .jp-Diff-attachment,
 .jp-Notebook-diff .jp-Diff-added .jp-Diff-renderedOuput,
 .jp-Cellrow-outputs .jp-Diff-twoway .jp-Diff-remote {
   background-color: var(--jp-diff-added-color2);
@@ -172,6 +180,49 @@
 
 .jp-Notebook-diff .jp-Cellrow-source .jp-InputPrompt {
   text-align: left;
+}
+
+.jp-Notebook-diff .jp-Cellrow-attachments .jp-Diff-twoway .jp-Diff-attachment {
+  text-align: center;
+}
+
+.jp-Notebook-diff .jp-Cellrow-attachments .jp-Diff-twoway .jp-Diff-base img {
+  outline: solid var(--jp-diff-deleted-color0) 1px;
+  outline-offset: 1px;
+}
+
+.jp-Notebook-diff .jp-Cellrow-attachments .jp-Diff-twoway .jp-Diff-remote img {
+  outline: solid var(--jp-diff-added-color0) 1px;
+  outline-offset: 1px;
+}
+
+.jp-Notebook-diff .jp-Diff-attachment img {
+  max-width: 500px;
+  margin: 3px;
+  background-image: url('checker.png');
+
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -o-crisp-edges;
+  image-rendering: pixelated;
+}
+
+.jp-Notebook-diff .jp-Diff-attachment img.mod-width-largest {
+  min-width: 50px;
+}
+
+.jp-Notebook-diff .jp-Diff-attachment img.mod-height-largest {
+  min-height: 50px;
+}
+
+.jp-Notebook-diff .jp-Diff-attachment.jp-Diff-base .jp-Diff-dimensionChanged {
+  color: var(--jp-diff-deleted-color0);
+}
+
+.jp-Notebook-diff .jp-Diff-attachment.jp-Diff-remote .jp-Diff-dimensionChanged {
+  color: var(--jp-diff-added-color0);
 }
 
 .jp-CollapsiblePanel-container {
