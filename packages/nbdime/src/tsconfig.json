@@ -5,7 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    "lib": ["dom", "es5", "es2015.promise"],
+    "lib": ["dom", "es5", "es2015.promise", "es2015.collection"],
     "outDir": "../lib",
     "noImplicitAny": true,
     "noEmitOnError": true,

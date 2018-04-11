@@ -51,6 +51,10 @@ import {
 } from './output';
 
 import {
+  AttachmentMergeView
+} from './attachment';
+
+import {
   createCheckbox, UNCHANGED_MERGE_CLASS,
   ONEWAY_LOCAL_CLASS, ONEWAY_REMOTE_CLASS,
   TWOWAY_ADDITION_CLASS, TWOWAY_DELETION_CLASS,
@@ -266,6 +270,13 @@ class CellMergeWidget extends Panel {
           for (let o of m.outputs) {
             outputsChanged = outputsChanged || !o.unchanged;
           }
+        }
+      }
+
+      if (hasEntries(model.merged.attachments)) {
+        let container = new Panel();
+        for (let a of model.merged.attachments) {
+          let view = new AttachmentMergeView(a, CURR_CLASSES, this._rendermime, )
         }
       }
 
