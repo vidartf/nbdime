@@ -42,6 +42,13 @@ import {
   OutputPanel
 } from './output';
 
+import {
+  AttachmentView
+} from './attachment';
+
+import {
+  AttachmentDiffModel, RenderableDiffModel
+} from '../model';
 
 /**
  * The class name added to the prompt area of cell.
@@ -57,6 +64,7 @@ const OUTPUTS_DIFF_CLASS = 'jp-Diff-outputsContainer';
 
 const EXECUTIONCOUNT_ROW_CLASS = 'jp-Cellrow-executionCount';
 const SOURCE_ROW_CLASS = 'jp-Cellrow-source';
+const ATTACHMENTS_ROW_CLASS = 'jp-Cellrow-attachments';
 const METADATA_ROW_CLASS = 'jp-Cellrow-metadata';
 const OUTPUTS_ROW_CLASS = 'jp-Cellrow-outputs';
 
@@ -108,6 +116,25 @@ class CellDiffWidget extends Panel {
     }
     this.addWidget(sourceView);
 
+    if (hasEntries(model.attachments)) {
+      let container = new Panel();
+      let changed = false;
+      for (let o of model.attachments) {
+        let w = CellDiffWidget.createView(
+          o, model, CURR_DIFF_CLASSES, this._rendermime);
+        container.addWidget(w);
+        changed = changed || !o.unchanged || o.added || o.deleted;
+      }
+      if (model.added || model.deleted) {
+        container.addClass(ATTACHMENTS_ROW_CLASS);
+        this.addWidget(container);
+      } else if (changed) {
+        let header = 'Attachments changed';
+        let collapser = new CollapsiblePanel(container, header, false);
+        collapser.addClass(ATTACHMENTS_ROW_CLASS);
+        this.addWidget(collapser);
+      }
+    }
     if (!model.metadata.unchanged) {
       let metadataView = CellDiffWidget.createView(
         model.metadata, model, CURR_DIFF_CLASSES, this._rendermime);
@@ -204,6 +231,7 @@ class CellDiffWidget extends Panel {
       } else {
         inner = createNbdimeMergeView(model);
       }
+      // TODO: Handle AttachmentDiffModel with AttachmentView
       if (model.collapsible) {
         view = new CollapsiblePanel(
             inner, model.collapsibleHeader, model.startCollapsed);

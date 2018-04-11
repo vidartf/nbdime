@@ -7,6 +7,10 @@ import {
 } from '@jupyterlab/services';
 
 import {
+  RenderMime
+} from 'jupyterlab/lib/rendermime';
+
+import {
   each
 } from 'phosphor/lib/algorithm/iteration';
 
@@ -21,6 +25,24 @@ import {
 import {
   RenderableDiffModel
 } from './renderable';
+
+
+/**
+ * Convert a mime bundle to a mime map.
+ */
+export
+function convertBundle(bundle: nbformat.IMimeBundle): RenderMime.MimeMap<string> {
+  let map: RenderMime.MimeMap<string> = Object.create(null);
+  for (let mimeType in bundle) {
+    let value = bundle[mimeType];
+    if (Array.isArray(value)) {
+      map[mimeType] = (value as string[]).join('\n');
+    } else {
+      map[mimeType] = value as string;
+    }
+  }
+  return map;
+}
 
 
 /**
