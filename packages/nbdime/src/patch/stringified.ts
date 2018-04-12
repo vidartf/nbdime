@@ -233,7 +233,7 @@ function patchStringifiedObject(base: ReadonlyJSONObject, diff: IDiffObjectEntry
             length += keyString.length;
           }
           // Check if postfix should be included or not
-          if (isReplace || !helper.entriesAfterCurrentAddRem()) {
+          if (isReplace || !helper.hasEntriesAfterCurrentAddRem()) {
             length -= postfix.length;
             if (e.op === 'add') {
               length += 1;  // Newline will still be added
@@ -253,7 +253,7 @@ function patchStringifiedObject(base: ReadonlyJSONObject, diff: IDiffObjectEntry
             length += keyString.length;
           }
           // Check if postfix should be included or not
-          if (isReplace || !helper.entriesAfterCurrentAddRem()) {
+          if (isReplace || !helper.hasEntriesAfterCurrentAddRem()) {
             length -= postfix.length;
             if (e.op === 'remove') {
               length += 1; // Newline will still be removed

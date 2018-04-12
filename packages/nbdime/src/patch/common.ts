@@ -53,7 +53,7 @@ class PatchObjectHelper implements IIterator<string> {
    * Assumes current key is a diff key to either an add or remove op.
    * @returns {boolean}
    */
-  entriesAfterCurrentAddRem(): boolean {
+  hasEntriesAfterCurrentAddRem(): boolean {
     if (this._currentIsAddition === undefined) {
       throw new Error('Current op is not an add or remove op');
     }

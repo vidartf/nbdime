@@ -37,7 +37,7 @@ import {
 } from './common';
 
 import {
-  RenderableDiffView
+  RenderableDiffView, isBase64, DATA_IS_BASE64_CLASS
 } from './renderable';
 
 import {
@@ -76,11 +76,6 @@ const TRUST_BUTTON_CLASS = 'jp-Diff-trustOutputButton';
 const SOURCE_BUTTON_CLASS = 'jp-Diff-showOutputSourceButton';
 
 /**
- * Class for outputs which data is base64
- */
-const DATA_IS_BASE64_CLASS = 'jp-diff-base64Output';
-
-/**
  * Class of dropdown for selecting mimetype to show
  */
 
@@ -91,13 +86,6 @@ const MIMETYPE_SELECT_CLASS = 'jp-Diff-outputMimetypeSelect';
  * A list of outputs that are sanitizable.
  */
 const sanitizable = ['text/html'];
-
-
-
-let _base64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
-function isBase64(data: string | null, minLength=64): boolean {
-  return data !== null && data.length > minLength && _base64.test(data.replace('\n', ''));
-}
 
 
 

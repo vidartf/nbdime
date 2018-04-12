@@ -4,22 +4,22 @@
 
 import {
   nbformat
-} from '@jupyterlab/services';
+} from '@jupyterlab/coreutils';
 
 import {
-  IRenderMime
-} from 'jupyterlab/lib/rendermime';
+  IRenderMimeRegistry, IRenderMime
+} from '@jupyterlab/rendermime';
 
 import {
-  Widget
-} from 'phosphor/lib/ui/widget';
+  Widget, Panel
+} from '@phosphor/widgets';
 
 import {
-  RenderableDiffView
+  RenderableDiffView, isBase64, DATA_IS_BASE64_CLASS
 } from './renderable';
 
 import {
-  AttachmentDiffModel, convertBundle
+  AttachmentDiffModel
 } from '../model';
 
 
@@ -35,25 +35,21 @@ export
 class AttachmentView extends RenderableDiffView<nbformat.IMimeBundle> {
   constructor(model: AttachmentDiffModel,
               editorClass: string[],
-              rendermime: IRenderMime) {
-    super(model, editorClass, rendermime);
+              rendermime: IRenderMimeRegistry,
+              mimetype: string) {
+    super(model, editorClass, rendermime, mimetype);
     AttachmentView.metaImages(this);
   }
 
   /**
-   * Checks if cell attachemnts can be rendered as untrusted (either safe or
+   * Checks if cell attachemnts can be rendered (either safe or
    * sanitizable)
    */
-  static canRenderUntrusted(model: AttachmentDiffModel): boolean {
-    let toTest: nbformat.IMimeBundle[] = [];
-    if (model.base) {
-      toTest.push(model.base);
-    }
-    if (model.remote && model.remote !== model.base) {
-      toTest.push(model.remote);
-    }
+  static canRender(model: AttachmentDiffModel, rendermime: IRenderMimeRegistry): boolean {
+    let toTest: nbformat.IMimeBundle[] = model.contents;
     for (let bundle of toTest) {
-      if (!RenderableDiffView.safeOrSanitizable(bundle)) {
+      let mimetype = rendermime.preferredMimeType(bundle, model.trusted);
+      if (!mimetype) {
         return false;
       }
     }
@@ -103,14 +99,46 @@ class AttachmentView extends RenderableDiffView<nbformat.IMimeBundle> {
    * Create a widget which renders the given cell output
    */
   protected createSubView(bundle: nbformat.IMimeBundle, trusted: boolean): Widget {
-    let widget = this._rendermime.render({
-      bundle: convertBundle(bundle),
-      trusted
-    });
-    widget.addClass(ATTACHMENT_CLASS);
-    return widget;
+    let panel = new RenderedAttachmentWidget(this.rendermime);
+    panel.updateView(bundle, trusted, this.mimetype);
+    return panel;
   }
 
   _sanitized: boolean;
-  _rendermime: IRenderMime;
+  _rendermime: IRenderMimeRegistry;
+}
+
+
+class RenderedAttachmentWidget extends Panel {
+
+  /**
+   *
+   */
+  constructor(rendermime: IRenderMimeRegistry) {
+    super();
+    this.rendermime = rendermime;
+  }
+
+  updateView(bundle: nbformat.IMimeBundle, trusted: boolean, mimetype: string) {
+    let old = this.renderer;
+    this.renderer = this.createRenderer(bundle, trusted, mimetype);
+    if (old !== undefined) {
+      old.dispose();
+    }
+    this.addWidget(this.renderer);
+  }
+
+  protected createRenderer(bundle: nbformat.IMimeBundle, trusted: boolean, mimetype: string): IRenderMime.IRenderer {
+    let widget = this.rendermime.createRenderer(mimetype);
+    widget.renderModel(model);
+    widget.addClass(ATTACHMENT_CLASS);
+    if (isBase64(bundle[mimetype] as string)) {
+      widget.addClass(DATA_IS_BASE64_CLASS);
+    }
+    return widget;
+  }
+
+  protected renderer: IRenderMime.IRenderer | undefined;
+
+  protected rendermime: IRenderMimeRegistry;
 }

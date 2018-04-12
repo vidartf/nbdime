@@ -18,6 +18,29 @@ import {
    RenderableDiffModel
 } from '../model';
 
+
+
+/**
+ * Class for outputs which data is base64
+ */
+export
+const DATA_IS_BASE64_CLASS = 'jp-diff-base64Output';
+
+
+
+let _base64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+/**
+ * Whether a string matches the format of a base64 string of a minimum length.
+ *
+ * @param data The string to inspect
+ * @param minLength The minimum length the data needs to have
+ */
+export
+function isBase64(data: string | null, minLength=64): boolean {
+  return data !== null && data.length > minLength && _base64.test(data.replace('\n', ''));
+}
+
+
 /**
  * Widget for outputs with renderable MIME data.
  */
