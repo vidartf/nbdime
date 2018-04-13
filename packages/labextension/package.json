@@ -27,7 +27,15 @@
     "notebook"
   ],
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "discovery": {
+      "server": {
+        "base": {
+          "name": "nbdime"
+        },
+        "managers": ["pip", "conda"]
+      }
+    }
   },
   "scripts": {
     "clean": "rimraf lib",
