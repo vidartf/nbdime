@@ -1,7 +1,7 @@
 
 
 import {
-  nbformat, URLExt
+  nbformat
 } from '@jupyterlab/coreutils';
 
 import {
@@ -40,9 +40,6 @@ import {
   requestJsonPromise
 } from 'nbdime/lib/request';
 
-import {
-  valueIn
-} from 'nbdime/lib/common/util';
 
 /**
  * Class of the outermost widget, the draggable tab

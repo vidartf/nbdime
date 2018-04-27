@@ -3,6 +3,10 @@
 
 
 import {
+  JupyterLabPlugin, JupyterLab
+} from '@jupyterlab/application';
+
+import {
   Toolbar, ToolbarButton
 } from '@jupyterlab/apputils';
 
@@ -27,10 +31,6 @@ import {
 } from '@jupyterlab/notebook';
 
 import {
-  JupyterLabPlugin, JupyterLab
-} from '@jupyterlab/application';
-
-import {
   find
 } from '@phosphor/algorithm';
 
@@ -39,7 +39,7 @@ import {
 } from '@phosphor/commands';
 
 import {
-  ReadonlyJSONObject, Token
+  Token
 } from '@phosphor/coreutils';
 
 import {
