@@ -94,13 +94,15 @@ class NbdimeWidget extends Panel {
       Private.toggleShowUnchanged(this.scroller, false);
     }
 
-    let args: JSONObject;
+    let args: JSONObject = {base: this.base};
     if (this.remote) {
-      args = {base: this.base, remote: this.remote};
-    } else if (options.baseLabel === 'Checkpoint') {
-      args = {base: `checkpoint:${this.base}`}
-    } else {
-      args = {base: `git:${this.base}`}
+      args.remote = this.remote;
+    }
+    if (options.gitRevA) {
+      args.revA = options.gitRevA;
+    }
+    if (options.gitRevB) {
+      args.revB = options.gitRevB;
     }
 
     requestApiJson(
@@ -173,17 +175,17 @@ namespace NbdimeWidget {
     /**
      * The base notebook path.
      */
-    base: string,
+    base: string;
 
     /**
-     * The remote notebook path. If undefined, base will be diffed against git HEAD.
+     * The remote notebook path.
      */
-    remote?: string,
+    remote?: string;
 
     /**
      * A rendermime instance to use to render markdown/outputs.
      */
-    rendermime: IRenderMimeRegistry,
+    rendermime: IRenderMimeRegistry;
 
     /**
      * If specified this will be use to represent the base file in the view.
@@ -192,7 +194,7 @@ namespace NbdimeWidget {
      *
      * Note: The labels will be ignored for git diffs.
      */
-    baseLabel?: string,
+    baseLabel?: string;
 
     /**
      * If specified this will be use to represent the remote file in the view.
@@ -201,12 +203,22 @@ namespace NbdimeWidget {
      *
      * Note: The labels will be ignored for git diffs.
      */
-    remoteLabel?: string,
+    remoteLabel?: string;
 
     /**
      * Whether to hide unchanged cells by default.
      */
-    hideUnchanged?: boolean,
+    hideUnchanged?: boolean;
+
+    /**
+     * If displaying git diff, this revision string will be used for the base notebook.
+     */
+    gitRevA?: string;
+
+    /**
+     * If displaying git diff, this revision string will be used for the remote notebook.
+     */
+    gitRevB?: string;
   }
 }
 
@@ -228,9 +240,16 @@ namespace Private {
       }
     } else {
       if (!baseLabel) {
-        baseLabel = 'git HEAD';
+        baseLabel = `git ${options.gitRevA || 'HEAD'}`
       }
-      remoteLabel = base;
+      if (!remoteLabel) {
+        if (options.gitRevB) {
+          remoteLabel = `git ${options.gitRevB}`;
+        } else {
+          // Workdir, use file path
+          remoteLabel = base;
+        }
+      }
     }
 
     let node = document.createElement('div');

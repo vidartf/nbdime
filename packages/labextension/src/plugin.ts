@@ -51,7 +51,11 @@ import {
 } from '@phosphor/widgets';
 
 import {
-  diffNotebookGit, diffNotebook, diffNotebookCheckpoint, isNbInGit
+  IGitExtension
+} from '@jupyterlab/git'
+
+import {
+  diffNotebookGit, diffNotebookGitRev, diffNotebookCheckpoint, isNbInGit
 } from './actions';
 
 
@@ -285,6 +289,7 @@ function addCommands(
 const nbDiffProvider: JupyterLabPlugin<void> = {
   id: pluginId,
   requires: [INotebookTracker, IRenderMimeRegistry, ISettingRegistry],
+  optional: [IGitExtension],
   activate: activateWidgetExtension,
   autoStart: true
 };
@@ -295,13 +300,13 @@ export default nbDiffProvider;
 /**
  * Activate the widget extension.
  */
-async function activateWidgetExtension(
+async function activateWidgetExtension(app: JupyterLab, tracker: INotebookTracker, rendermime: IRenderMimeRegistry, git: IGitExtension | null): void {
   app: JupyterLab,
   tracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   settingsRegistry: ISettingRegistry,
 ): Promise<void> {
-  let {commands, docRegistry} = app;
+  let {commands, shell, docRegistry} = app;
   let extension = new NBDiffExtension(commands);
   docRegistry.addWidgetExtension('Notebook', extension);
 
@@ -315,4 +320,19 @@ async function activateWidgetExtension(
       commands.notifyCommandChanged(CommandIDs.diffNotebookCheckpoint);
     }
   });
+
+  function displayGitDiff(path: string, revA: string, revB: string) {
+    let widget = diffNotebookGitRev({
+      path,
+      rendermime,
+      revA,
+      revB,
+    });
+    shell.addToMainArea(widget);
+    shell.activateById(widget.id);
+  }
+
+  if (git) {
+    git.registerDiffProvider(['.ipynb'], displayGitDiff);
+  }
 }

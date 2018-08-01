@@ -58,7 +58,7 @@ function diffNotebookCheckpoint(args: {
   let name = PathExt.basename(path, '.ipynb');
   let base = PathExt.join(nb_dir, name + '.ipynb');
   let widget = new NbdimeWidget({
-    base,
+    base: `checkpoint:${base}`,
     rendermime,
     baseLabel: 'Checkpoint',
     hideUnchanged,
@@ -78,9 +78,31 @@ function diffNotebookGit(args: {
 }): Widget {
   const {path, rendermime, hideUnchanged} = args;
   let name = PathExt.basename(path, '.ipynb');
-  let widget = new NbdimeWidget({base: path, rendermime, hideUnchanged});
+  let widget = new NbdimeWidget({base: `git:${path}`, rendermime, hideUnchanged});
   widget.title.label = `Diff git: ${name}`;
   widget.title.caption = `Local: git HEAD\nRemote: '${path}'`;
+  widget.title.iconClass = 'fa fa-git jp-fa-tabIcon';
+  return widget;
+}
+
+
+export
+function diffNotebookGitRev(args: {
+    readonly path: string,
+    readonly revA: string,
+    readonly revB: string,
+    readonly rendermime: IRenderMimeRegistry
+  }): Widget {
+  const {path, rendermime, revA, revB} = args;
+  let name = PathExt.basename(path, '.ipynb');
+  let widget = new NbdimeWidget({
+    base:  `git:${path}`,
+    rendermime,
+    gitRevA: revA,
+    gitRevB: revB,
+  });
+  widget.title.label = `Diff git: ${name}`;
+  widget.title.caption = `Local: git ${revA || 'HEAD'}\nRemote: '${revB || path}'`;
   widget.title.iconClass = 'fa fa-git jp-fa-tabIcon';
   return widget;
 }

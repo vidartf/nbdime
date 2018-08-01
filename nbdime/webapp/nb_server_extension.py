@@ -72,23 +72,23 @@ class CheckpointDifftoolHandler(NbdimeHandler):
 class ExtensionApiDiffHandler(ApiDiffHandler):
     """Diff API handler that also handles diff to git HEAD"""
 
-    def _get_git_notebooks(self, base_arg):
+    def _get_git_notebooks(self, path_arg, revA='HEAD', revB=None):
         # Sometimes the root dir of the files is not cwd
         nb_root = getattr(self.contents_manager, 'root_dir', None)
         # Resolve base argument to a file system path
-        base = os.path.realpath(to_os_path(base_arg, nb_root))
+        path = os.path.realpath(to_os_path(path_arg, nb_root))
 
         # Ensure path/root_dir that can be sent to git:
         try:
-            git_root = find_repo_root(base)
+            git_root = find_repo_root(path)
         except InvalidGitRepositoryError as e:
             self.log.exception(e)
-            raise HTTPError(422, 'Invalid notebook: %s' % base)
-        base = os.path.relpath(base, git_root)
+            raise HTTPError(422, 'Invalid notebook: %s' % path)
+        path = os.path.relpath(path, git_root)
 
         # Get the base/remote notebooks:
         try:
-            for fbase, fremote in changed_notebooks('HEAD', None, base, git_root):
+            for fbase, fremote in changed_notebooks(revA, revB, path, git_root):
                 base_nb = read_notebook(fbase, on_null='minimal')
                 remote_nb = read_notebook(fremote, on_null='minimal')
                 break  # there should only ever be one set of files
@@ -96,11 +96,11 @@ class ExtensionApiDiffHandler(ApiDiffHandler):
                 # The filename was either invalid or the file is unchanged
                 # Assume unchanged, and let read_notebook handle error
                 # reporting if invalid
-                base_nb = self.read_notebook(os.path.join(git_root, base))
+                base_nb = self.read_notebook(os.path.join(git_root, path))
                 remote_nb = base_nb
         except (InvalidGitRepositoryError, BadName) as e:
             self.log.exception(e)
-            raise HTTPError(422, 'Invalid notebook: %s' % base_arg)
+            raise HTTPError(422, 'Invalid notebook: %s' % path_arg)
         except GitCommandNotFound as e:
             self.log.exception(e)
             raise HTTPError(
@@ -142,7 +142,11 @@ class ExtensionApiDiffHandler(ApiDiffHandler):
         body = json.loads(escape.to_unicode(self.request.body))
         base = body['base']
         if base.startswith('git:'):
-            base_nb, remote_nb = self._get_git_notebooks(base[len('git:'):])
+            base_nb, remote_nb = self._get_git_notebooks(
+                base[len('git:'):],
+                body.get('revA', 'HEAD'),
+                body.get('revB', None)
+            )
         elif base.startswith('checkpoint:'):
             base_nb, remote_nb = yield self._get_checkpoint_notebooks(base[len('checkpoint:'):])
         else:
