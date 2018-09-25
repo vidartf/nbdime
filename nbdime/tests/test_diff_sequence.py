@@ -36,6 +36,7 @@ def algorithm(request):
     nbdime.diffing.sequences.diff_sequence_algorithm = alg
 
 
+#pylint: disable=redefined-outer-name
 def test_diff_sequence(algorithm):
     "FIXME: Add wide range of test cases here."
 

@@ -85,6 +85,7 @@ def bundle_decisions(base, decisions, pattern, callback):
         prefix = dec.common_path[:level]
         if prefix not in decision_groups:
             decision_groups[prefix] = []
+        #pylint: disable=protected-access
         dec._level = level
         decision_groups[prefix].append(dec)
 

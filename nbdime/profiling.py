@@ -44,8 +44,8 @@ from functools import wraps
 
 
 def _sort_time(value):
-    time = value[1]['time']
-    return -time
+    t = value[1]['time']
+    return -t
 
 
 class TimePaths(object):
@@ -100,9 +100,9 @@ class TimePaths(object):
         items = sorted(self.map.items(), key=_sort_time)
         lines = []
         for key, data in items:
-            time = data['time']
+            t = data['time']
             calls = data['calls']
-            lines.append((key, calls, time, time / calls))
+            lines.append((key, calls, t, t / calls))
         return tabulate(lines, headers=['Key', 'Calls', 'Time', 'Time/Call'])
 
 

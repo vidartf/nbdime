@@ -22,6 +22,7 @@ def cut(li, *indices):
     return c
 
 
+#pylint: disable=redefined-outer-name
 def assert_either_decision(d, diff):
     assert not d.conflict
     assert d.action == 'either'

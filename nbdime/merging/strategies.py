@@ -595,7 +595,6 @@ def resolve_strategy_inline_recurse(path, base, decisions):
             elif k == 'outputs':
                 cell[k] = []
                 # TODO: Do inline merge
-                pass
 
             else:
                 raise ValueError('Conflict on unrecognized key: %r' % (k,))

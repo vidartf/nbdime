@@ -33,7 +33,7 @@ def test_patch_str():
     assert patch("world", [op_patch(0, [op_remove(0), op_add(0, "W")])]) == "World"
 
     # Test !, item patch (doesn't make sense for str)
-    pass
+    # TODO
 
     # Test ++, sequence insertion
     assert patch("", [op_patch(0, [op_addrange(0, "34"), op_add(0, "5"), op_addrange(0, "67")])]) == "34567"
@@ -58,7 +58,7 @@ def test_patch_list():
     assert patch([5, 6, 7], [op_remove(0), op_remove(2)]) == [6]
 
     # Test :, single item replace
-    pass
+    # TODO
 
     # Test !, item patch
     assert patch(["hello", "world"], [op_patch(0, [op_patch(0, [op_replace(0, "H")])]),

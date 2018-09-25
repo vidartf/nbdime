@@ -3,6 +3,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+# pylint: disable=redefined-outer-name
+
 import logging
 import os
 import shutil
@@ -393,6 +395,7 @@ _port = 62019
 
 @fixture()
 def unique_port():
+    #pylint: disable=global-statement
     global _port
     _port += 1
     return _port

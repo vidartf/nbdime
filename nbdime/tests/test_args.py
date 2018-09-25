@@ -1,4 +1,6 @@
 
+#pylint: disable=redefined-outer-name
+
 import argparse
 import pytest
 import json

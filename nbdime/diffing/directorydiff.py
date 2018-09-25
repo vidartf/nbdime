@@ -4,6 +4,8 @@
 Does not handle file moves/renames (yet).
 """
 
+#pylint: disable=attribute-defined-outside-init
+
 import os
 import filecmp
 from functools import partial
