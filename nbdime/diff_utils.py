@@ -38,12 +38,11 @@ def count_consumed_symbols(e):
     op = e.op
     if op == DiffOp.ADDRANGE:
         return (0, len(e.valuelist))
-    elif op == DiffOp.REMOVERANGE:
+    if op == DiffOp.REMOVERANGE:
         return (e.length, 0)
-    elif op == DiffOp.PATCH:
+    if op == DiffOp.PATCH:
         return (1, 1)
-    else:
-        raise NBDiffFormatError("Invalid op '{}'".format(op))
+    raise NBDiffFormatError("Invalid op '{}'".format(op))
 
 
 def source_as_string(source):
@@ -67,7 +66,7 @@ def _overlaps(existing, new):
         if existing.key == new.key:
             # Found a match, combine ops
             return True
-        elif (existing.op == DiffOp.REMOVERANGE and
+        if (existing.op == DiffOp.REMOVERANGE and
               existing.key + existing.length >= new.key):
             # Overlapping deletes
             # Above check is open ended to allow sanity check here:
@@ -102,6 +101,8 @@ def _combine_ops(existing, new):
     elif new.op == DiffOp.REMOVERANGE:
         assert existing.op == DiffOp.REMOVERANGE, "Unexpect diff op. Invalid use of _combine_ops"
         return op_removerange(existing.key, existing.length + new.length)
+
+    raise ValueError('Cannot combine into diff op %r' % new.op)
 
 
 def flatten_list_of_string_diff(a, linebased_diff):
@@ -155,20 +156,18 @@ def to_clean_dicts(di):
     "Recursively convert dict-like objects to straight python dicts."
     if isinstance(di, dict):
         return {k: to_clean_dicts(v) for k, v in di.items()}
-    elif isinstance(di, list):
+    if isinstance(di, list):
         return [to_clean_dicts(v) for v in di]
-    else:
-        return di
+    return di
 
 
 def to_diffentry_dicts(di):  # TODO: Better name, validate_diff? as_diff?
     "Recursively convert dict objects to DiffEntry objects with attribute access."
     if isinstance(di, dict):
         return DiffEntry(**{k: to_diffentry_dicts(v) for k, v in di.items()})
-    elif isinstance(di, list):
+    if isinstance(di, list):
         return [to_diffentry_dicts(v) for v in di]
-    else:
-        return di
+    return di
 
 def as_dict_based_diff(di):
     """Converting to dict-based diff format for dicts for convenience.

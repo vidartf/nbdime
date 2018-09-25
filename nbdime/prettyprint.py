@@ -225,8 +225,8 @@ def format_merge_render_lines(
     postlines = []
     i = len(local) - 1
     j = len(remote) - 1
-    while (i >= 0 and i < len(local) and
-           j >= 0 and j < len(remote) and
+    while (0 <= i < len(local) and
+           0 <= j < len(remote) and
            local[i] == remote[j]):
         postlines.append(local[i])
         i += 1
@@ -276,9 +276,9 @@ def builtin_merge_render(base, local, remote, strategy=None):
 
     if strategy == "use-local":
         return local, 0
-    elif strategy == "use-remote":
+    if strategy == "use-remote":
         return remote, 0
-    elif strategy is not None:
+    if strategy is not None:
         warning("Using builtin merge render but ignoring strategy %s", strategy)
 
     # Styling
@@ -349,10 +349,9 @@ def diff_render_with_difflib(a, b, config):
 def diff_render(a, b, config=DefaultConfig):
     if config.use_git and which('git'):
         return diff_render_with_git(a, b, config)
-    elif config.use_diff and which('diff'):
+    if config.use_diff and which('diff'):
         return diff_render_with_diff(a, b)
-    else:
-        return diff_render_with_difflib(a, b, config)
+    return diff_render_with_difflib(a, b, config)
 
 
 def merge_render_with_git(b, l, r, strategy=None):
@@ -380,9 +379,9 @@ def merge_render_with_diff3(b, l, r, strategy=None):
     cmd = diff3_print_cmd
     if strategy == "use-local":
         return l, 0
-    elif strategy == "use-remote":
+    if strategy == "use-remote":
         return r, 0
-    elif strategy is not None:
+    if strategy is not None:
         warning("Using diff3 but ignoring strategy %s", strategy)
     merged, status = external_merge_render(cmd.split(), b, l, r)
     return merged, status
@@ -393,10 +392,9 @@ def merge_render(b, l, r, strategy=None, config=DefaultConfig):
         return b, 0
     if config.use_git and which('git'):
         return merge_render_with_git(b, l, r, strategy)
-    elif config.use_diff and which('diff3'):
+    if config.use_diff and which('diff3'):
         return merge_render_with_diff3(b, l, r, strategy)
-    else:
-        return builtin_merge_render(b, l, r, strategy)
+    return builtin_merge_render(b, l, r, strategy)
 
 
 def file_timestamp(filename):
@@ -405,8 +403,7 @@ def file_timestamp(filename):
         t = os.path.getmtime(filename)
         dt = datetime.datetime.fromtimestamp(t)
         return dt.isoformat(str(" "))
-    else:
-        return "(no timestamp)"
+    return "(no timestamp)"
 
 
 def hash_string(s):

@@ -113,12 +113,12 @@ def main(args=None):
         # mergeapp expects an additional decisions arg:
         opts.decisions = False
         return nbmergeapp.main_merge(opts)
-    elif opts.subcommand == 'config':
+    if opts.subcommand == 'config':
         opts.config_func(opts.scope)
         return 0
-    else:
-        parser.print_help()
-        return 1
+
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":

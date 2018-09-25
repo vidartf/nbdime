@@ -18,55 +18,10 @@ from nbdime.vcs.git.diffdriver import main as gdd_main
 from nbdime.prettyprint import file_timestamp
 from nbdime.utils import locate_gitattributes
 
+from .diff_driver_strings import expected_output, expected_source_only
 from .utils import WEB_TEST_TIMEOUT, call
 
 
-# Expected output includes coloring characters
-expected_output = """nbdiff {0} {1}
---- {0}  {2}
-+++ {1}  {3}
-## modified /cells/0/outputs/0/data/text/plain:
--  6
-+  3
-
-## modified /cells/0/source:
-@@ -1,3 +1,3 @@
--def foe(x, y):
-+def foo(x, y):
-     return x + y
--foe(3, 2)
-+foo(1, 2)
-
-## modified /cells/1/source:
-@@ -1,3 +1,3 @@
--def foo(x, y):
-+def foe(x, y):
-     return x * y
--foo(1, 2)
-+foe(1, 2)
-
-"""
-
-expected_source_only = """nbdiff {0} {1}
---- {0}  {2}
-+++ {1}  {3}
-## modified /cells/0/source:
-@@ -1,3 +1,3 @@
--def foe(x, y):
-+def foo(x, y):
-     return x + y
--foe(3, 2)
-+foo(1, 2)
-
-## modified /cells/1/source:
-@@ -1,3 +1,3 @@
--def foo(x, y):
-+def foe(x, y):
-     return x * y
--foo(1, 2)
-+foe(1, 2)
-
-"""
 
 expected_no_filter = """nbdiff {0} {1}
 --- {0}  {2}

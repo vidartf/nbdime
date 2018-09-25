@@ -32,15 +32,15 @@ def config_instance(cls):
     return instance
 
 
-def _load_config_files(basefilename, path=None):
+def _load_config_files(basefilename, paths=None):
     """Load config files (json) by filename and path.
 
     yield each config object in turn.
     """
 
-    if not isinstance(path, list):
-        path = [path]
-    for path in path[::-1]:
+    if not isinstance(paths, list):
+        paths = [paths]
+    for path in paths[::-1]:
         # path list is in descending priority order, so load files backwards:
         loader = JSONFileConfigLoader(basefilename+'.json', path=path)
         config = None
@@ -81,9 +81,9 @@ def build_config(entrypoint, include_none=False):
 
     # Get config from disk:
     disk_config = {}
-    path = jupyter_config_path()
-    path.insert(0, py3compat.getcwd())
-    for c in _load_config_files('nbdime_config', path=path):
+    paths = jupyter_config_path()
+    paths.insert(0, py3compat.getcwd())
+    for c in _load_config_files('nbdime_config', paths=paths):
         recursive_update(disk_config, c, include_none)
 
     config = {}

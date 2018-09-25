@@ -117,8 +117,7 @@ def _compare_mimedata_strings(x, y, comp_text, comp_base64):
     # Most likely base64 encoded data
     if _is_base64(x):
         return comp_base64(x, y)
-    else:
-        return comp_text(x, y)
+    return comp_text(x, y)
 
 
 def _compare_mimedata(mimetype, x, y, comp_text, comp_base64):
@@ -246,7 +245,7 @@ def compare_output_approximate(x, y):
 
         handled.update(("ename", "evalue", "traceback"))
 
-    elif ot == "display_data" or ot == "execute_result":
+    elif ot in ("display_data", "execute_result"):
         xd = x["data"]
         yd = y["data"]
         if not compare_mimebundle_approximate(xd, yd):
@@ -407,8 +406,8 @@ def diff_single_outputs(a, b, path="/cells/*/outputs/*",
             di.patch("data", dd)
 
         return di.validated()
-    else:
-        return diff(a, b)
+
+    return diff(a, b)
 
 
 def add_mime_diff(key, avalue, bvalue, diffbuilder):

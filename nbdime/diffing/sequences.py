@@ -32,12 +32,12 @@ def diff_sequence(a, b, compare=operator.__eq__):
         if compare is not operator.__eq__:
             raise RuntimeError("Cannot use difflib with comparison other than ==.")
         return diff_sequence_difflib(a, b)
-    elif diff_sequence_algorithm == "bruteforce":
+    if diff_sequence_algorithm == "bruteforce":
         return diff_sequence_bruteforce(a, b, compare)
-    elif diff_sequence_algorithm == "myers":
+    if diff_sequence_algorithm == "myers":
         return diff_sequence_myers(a, b, compare)
-    else:
-        raise RuntimeError("Unknown diff_sequence_algorithm {}.".format(diff_sequence_algorithm))
+
+    raise RuntimeError("Unknown diff_sequence_algorithm {}.".format(diff_sequence_algorithm))
 
 
 def diff_strings_by_char(a, b, path="", predicates=None, differs=None):
@@ -46,8 +46,7 @@ def diff_strings_by_char(a, b, path="", predicates=None, differs=None):
         'Arguments need to be string types. Got %r and %r' % (a, b))
     if a == b:
         return []
-    else:
-        return diff_sequence_difflib(a, b)
+    return diff_sequence_difflib(a, b)
 
 
 def diff_strings_linewise(a, b):

@@ -74,12 +74,12 @@ def main(args=None):
     opts = parser.parse_args(args)
     if opts.subcommand == 'merge':
         return nbmergetool.main_parsed(opts)
-    elif opts.subcommand == 'config':
+    if opts.subcommand == 'config':
         opts.config_func(opts.scope, opts.set_default)
         return 0
-    else:
-        parser.print_help()
-        return 1
+
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":

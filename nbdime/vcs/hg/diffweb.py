@@ -39,8 +39,8 @@ def main(args=None):
             if ret != 0:
                 return ret
         return ret
-    else:
-        return nbdifftool.main_parsed(opts)
+
+    return nbdifftool.main_parsed(opts)
 
 
 

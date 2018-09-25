@@ -119,17 +119,17 @@ def main(args=None):
         if opts.use_filter and opts.remote:
             opts.remote = apply_possible_filter(opts.path, opts.remote)
         return nbdiffapp.main_diff(opts)
-    elif opts.subcommand == 'webdiff':
+    if opts.subcommand == 'webdiff':
         from nbdime.webapp import nbdiffweb
         if opts.use_filter and opts.remote:
             opts.remote = apply_possible_filter(opts.path, opts.remote)
         return nbdiffweb.main_diff(opts)
-    elif opts.subcommand == 'config':
+    if opts.subcommand == 'config':
         opts.config_func(opts.scope)
         return 0
-    else:
-        parser.print_help()
-        return 1
+
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":

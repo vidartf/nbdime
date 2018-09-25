@@ -67,7 +67,7 @@ def test_shallow_merge_lists_delete_no_conflict():
             if j == i:
                 continue
             for k in range(len(b)):
-                if k == i or k == j:
+                if k in (i, j):
                     continue
                 l = cut(b, i, j)
                 r = cut(b, i, k)

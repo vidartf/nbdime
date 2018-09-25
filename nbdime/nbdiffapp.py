@@ -42,8 +42,9 @@ def main_diff(args):
                 # Short-circuit on error in diff handling
                 return status
         return status
-    else:  # Not gitrefs:
-        return _handle_diff(base, remote, output, args)
+
+    # Not gitrefs:
+    return _handle_diff(base, remote, output, args)
 
 
 def _handle_diff(base, remote, output, args):

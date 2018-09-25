@@ -117,7 +117,7 @@ def main_dispatch(args=None):
     else:
         if cmd == '--version':
             sys.exit(__version__)
-        if cmd == '-h' or cmd == '--help':
+        if cmd in ('-h', '--help'):
             sys.exit(HELP_MESSAGE_VERBOSE)
         if cmd == '--config':
             # List all possible config options:

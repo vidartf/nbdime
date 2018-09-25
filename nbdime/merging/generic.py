@@ -710,16 +710,15 @@ def _merge(base, local_diff, remote_diff, path, decisions, strategies):
         return _merge_dicts(
             base, local_diff, remote_diff,
             path, decisions, strategies)
-    elif isinstance(base, list):
+    if isinstance(base, list):
         return _merge_lists(
             base, local_diff, remote_diff,
             path, decisions, strategies)
-    elif isinstance(base, string_types):
+    if isinstance(base, string_types):
         return _merge_strings(
             base, local_diff, remote_diff,
             path, decisions, strategies)
-    else:
-        raise ValueError("Cannot handle merge of type {}.".format(type(base)))
+    raise ValueError("Cannot handle merge of type {}.".format(type(base)))
 
 
 def decide_merge_with_diff(base, local, remote, local_diff, remote_diff, strategies=None):

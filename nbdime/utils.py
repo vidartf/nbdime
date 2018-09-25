@@ -36,14 +36,12 @@ def read_notebook(f, on_null):
     if f == EXPLICIT_MISSING_FILE:
         if on_null == 'empty':
             return {}
-        elif on_null == 'minimal':
+        if on_null == 'minimal':
             return nbformat.v4.new_notebook()
-        else:
-            raise ValueError(
-                'Not valid value for `on_null`: %r. Valid values '
-                'are "empty" or "minimal"' % (on_null,))
-    else:
-        return nbformat.read(f, as_version=4)
+        raise ValueError(
+            'Not valid value for `on_null`: %r. Valid values '
+            'are "empty" or "minimal"' % (on_null,))
+    return nbformat.read(f, as_version=4)
 
 
 def as_text(text):
@@ -68,26 +66,23 @@ def as_text_lines(text):
 def strings_to_lists(obj):
     if isinstance(obj, dict):
         return {k: strings_to_lists(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         return [strings_to_lists(v) for v in obj]
-    elif isinstance(obj, string_types):
+    if isinstance(obj, string_types):
         return obj.splitlines(True)
-    else:
-        return obj
+    return obj
 
 
 def revert_strings_to_lists(obj):
     if isinstance(obj, dict):
         return {k: revert_strings_to_lists(v) for k, v in obj.items()}
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
         if not obj:
             return obj
-        elif isinstance(obj[0], string_types):
+        if isinstance(obj[0], string_types):
             return "".join(obj)
-        else:
-            return [revert_strings_to_lists(v) for v in obj]
-    else:
-        return obj
+        return [revert_strings_to_lists(v) for v in obj]
+    return obj
 
 
 def split_path(path):

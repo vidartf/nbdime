@@ -79,8 +79,8 @@ def ipynb_only(parent, path):
     return os.path.isdir(pjoin(parent, path)) or os.path.splitext(path)[1] == '.ipynb'
 
 
-def find_all_sub_notebooks(dirpath):
-    for dirpath, _, filenames in os.walk(dirpath, topdown=False):
+def find_all_sub_notebooks(top):
+    for dirpath, _, filenames in os.walk(top, topdown=False):
         for f in filenames:
             if os.path.splitext(f)[1] == '.ipynb':
                 yield pjoin(dirpath, f)

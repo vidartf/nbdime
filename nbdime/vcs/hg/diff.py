@@ -47,8 +47,8 @@ def main(args=None):
             if ret != 0:
                 return ret
         return ret
-    else:
-        return nbdiffapp.main_diff(opts)
+
+    return nbdiffapp.main_diff(opts)
 
 
 

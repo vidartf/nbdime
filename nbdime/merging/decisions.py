@@ -354,18 +354,18 @@ def _pop_path(diffs):
             continue
         # Check that we have only one op, which is a patch op
         if len(d) != 1 or d[0].op != DiffOp.PATCH:
-            return
+            return None
         # Ensure all present diffs have the same key
         if key is None:
             key = d[0].key
         elif key != d[0].key:
-            return
+            return None
         # Ensure the sub diffs of all ops are suitable as outer layer
         # if len(d[0].diff) > 1:
         #    return
         popped_diffs.append(d[0].diff)
     if key is None:
-        return
+        return None
     return {'key': key, 'diffs': popped_diffs}
 
 
@@ -504,15 +504,14 @@ def make_cleared_value(value):
     if isinstance(value, list):
         # Clearing e.g. an outputs list means setting it to an empty list
         return []
-    elif isinstance(value, dict):
+    if isinstance(value, dict):
         # Clearing e.g. a metadata dict means setting it to an empty dict
         return {}
-    elif isinstance(value, string_types):
+    if isinstance(value, string_types):
         # Clearing e.g. a source string means setting it to an empty string
         return ""
-    else:
-        # Clearing anything else (atomic values) means setting it to None
-        return None
+    # Clearing anything else (atomic values) means setting it to None
+    return None
 
 
 def filter_decisions(pattern, decisions, exact=False):
@@ -554,39 +553,40 @@ def resolve_action(base, decision):
     if a == "base":
         return []   # no-op
 
-    elif a in ("local", "either"):
+    if a in ("local", "either"):
         return copy.copy(decision.local_diff)
 
-    elif a == "remote":
+    if a == "remote":
         return copy.copy(decision.remote_diff)
 
-    elif a == "custom":
+    if a == "custom":
         return copy.copy(decision.custom_diff)
 
-    elif a == "local_then_remote":
+    if a == "local_then_remote":
         return decision.local_diff + decision.remote_diff
 
-    elif a == "remote_then_local":
+    if a == "remote_then_local":
         return decision.remote_diff + decision.local_diff
 
-    elif a in ("clear", "remove"):
+    if a in ("clear", "remove"):
         key, = set(d.key for d in decision.local_diff + decision.remote_diff)
         if a == 'clear':
             return [op_replace(key, make_cleared_value(base[key]))]
-        elif isinstance(base, (list,) + string_types):
+        if isinstance(base, (list,) + string_types):
             return [op_removerange(key, 1)]
-        else:
-            return [op_remove(key)]
+        return [op_remove(key)]
 
-    elif a == "clear_all":
+    if a == "clear_all":
         if isinstance(base, dict):
             # Ideally we would do a op_replace on the parent, but this is not
             # easily combined with this method, so simply remove all keys
             return [op_remove(key) for key in base.keys()]
-        elif isinstance(base, (list,) + string_types):
+        if isinstance(base, (list,) + string_types):
             return [op_removerange(0, len(base))]
 
-    elif a == "take_max":
+        raise TypeError('Unexpected base type for %r action: %r' % (a, base))
+
+    if a == "take_max":
         key, = set(d.key for d in decision.local_diff + decision.remote_diff)
         #assert len(decision.local_diff) == 1 == len(decision.remote_diff)
         bval = base[key]
@@ -595,11 +595,9 @@ def resolve_action(base, decision):
         mval = max(bval, lval, rval)
         if bval == mval:
             return []
-        else:
-            return [op_replace(key, mval)]
+        return [op_replace(key, mval)]
 
-    else:
-        raise NotImplementedError("The action \"%s\" is not defined" % a)
+    raise NotImplementedError("The action \"%s\" is not defined" % a)
 
 
 def apply_decisions(base, decisions):

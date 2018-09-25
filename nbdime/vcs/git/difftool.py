@@ -65,9 +65,10 @@ def show_diff(before, after, opts):
     """
     if before.endswith('.ipynb') or after.endswith('ipynb'):
         return nbdifftool.main_parsed(opts)
-    else:
-        # Never returns
-        os.execvp('git', ['git', 'diff', before, after])
+
+    # Never returns
+    os.execvp('git', ['git', 'diff', before, after])
+    return None
 
 
 def main(args=None):
@@ -102,12 +103,12 @@ def main(args=None):
         if opts.use_filter and remote:
             remote = apply_possible_filter(opts.path, remote)
         return show_diff(opts.local, remote, opts)
-    elif opts.subcommand == 'config':
+    if opts.subcommand == 'config':
         opts.config_func(opts.scope, opts.set_default)
         return 0
-    else:
-        parser.print_help()
-        return 1
+
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":

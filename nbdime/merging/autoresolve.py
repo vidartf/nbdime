@@ -17,12 +17,11 @@ def patch_item(value, diffentry):
     op = diffentry.op
     if op == DiffOp.REPLACE:
         return diffentry.value
-    elif op == DiffOp.PATCH:
+    if op == DiffOp.PATCH:
         return patch(value, diffentry.diff)
-    elif op == DiffOp.REMOVE:
+    if op == DiffOp.REMOVE:
         return Deleted
-    else:
-        raise ValueError("Invalid item patch op {}".format(op))
+    raise ValueError("Invalid item patch op {}".format(op))
 
 
 def make_join_value(value, le, re):
