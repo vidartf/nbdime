@@ -16,8 +16,6 @@ Use with:
     git merge [<commit> [<commit>]]
 """
 
-from __future__ import print_function
-
 import argparse
 import io
 import os

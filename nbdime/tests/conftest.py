@@ -10,7 +10,7 @@ import json
 import glob
 import io
 import re
-from subprocess import Popen
+from subprocess import Popen, TimeoutExpired
 import sys
 
 from jsonschema import Draft4Validator as Validator
@@ -22,27 +22,13 @@ from .utils import call, have_git, have_hg, wait_up, TEST_TOKEN
 
 from nbdime.diffing.notebooks import set_notebook_diff_targets
 
-try:
-    # Python >= 3.3
-    from subprocess import TimeoutExpired
-    def popen_wait(p, timeout):
-        return p.wait(timeout)
-except ImportError:
-    import time
-    class TimeoutExpired(Exception):
-        pass
-    def popen_wait(p, timeout):
-        """backport of Popen.wait from Python 3"""
-        for _ in range(int(10 * timeout)):
-            if p.poll() is not None:
-                return
-            time.sleep(0.1)
-        if p.poll() is None:
-            raise TimeoutExpired
-
 pjoin = os.path.join
 
 schema_dir = os.path.abspath(pjoin(os.path.dirname(__file__), ".."))
+
+
+def popen_wait(p, timeout):
+    return p.wait(timeout)
 
 
 def testspath():

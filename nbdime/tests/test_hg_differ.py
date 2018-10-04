@@ -3,12 +3,10 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from __future__ import unicode_literals
-
 import os
 from os.path import join as pjoin
 
-import mock
+from unittest import mock
 import pytest
 from tornado import ioloop
 

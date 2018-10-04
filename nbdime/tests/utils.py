@@ -3,15 +3,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from __future__ import unicode_literals
-from __future__ import print_function
-
-from six import string_types
-
 from contextlib import contextmanager
 import os
 import requests
 import shlex
+from shutil import which
 import sys
 import time
 from subprocess import check_output, check_call, STDOUT, CalledProcessError
@@ -22,11 +18,6 @@ import nbformat
 from nbdime import patch, diff
 from nbdime.diff_format import is_valid_diff
 
-
-try:
-    from shutil import which
-except ImportError:
-    from backports.shutil_which import which
 
 pjoin = os.path.join
 
@@ -79,7 +70,7 @@ def notebook_to_sources(nb, as_str=True):
         source = cell["source"]
         if as_str and isinstance(source, list):
             source = "\n".join([line.strip("\n") for line in source])
-        elif not as_str and isinstance(source, string_types):
+        elif not as_str and isinstance(source, str):
             source = source.splitlines(True)
         sources.append(source)
     return sources
@@ -93,7 +84,7 @@ def outputs_to_notebook(outputs):
         cell = nbformat.v4.new_code_cell()
         nb.cells.append(cell)
         for output in cell_outputs:
-            if isinstance(output, string_types):
+            if isinstance(output, str):
                 output = nbformat.v4.new_output(
                     output_type="display_data",
                     data={
@@ -118,14 +109,14 @@ def call(cmd):
 
     if str, split into command list
     """
-    if isinstance(cmd, string_types):
+    if isinstance(cmd, str):
         cmd = shlex.split(cmd)
     return check_call(cmd, stdout=sys.stdout, stderr=sys.stderr)
 
 
 def get_output(cmd, err=False, returncode=0):
     """Run a command and get its output (as text)"""
-    if isinstance(cmd, string_types):
+    if isinstance(cmd, str):
         cmd = shlex.split(cmd)
     stderr = STDOUT if err else sys.stderr
     try:

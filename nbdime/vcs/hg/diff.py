@@ -9,8 +9,6 @@ Use with:
     hg extdiff -p hg-nbdiff [<commit> [<commit>]]
 """
 
-from __future__ import print_function
-
 import os
 import sys
 

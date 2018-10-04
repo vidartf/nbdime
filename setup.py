@@ -4,8 +4,6 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from __future__ import print_function
-
 import io
 import os
 import sys
@@ -104,7 +102,6 @@ setup_args = dict(
 setuptools_args = {}
 install_requires = setuptools_args['install_requires'] = [
     'nbformat',
-    'six',
     'colorama',
     'tornado',
     'requests',
@@ -120,8 +117,6 @@ extras_require = setuptools_args['extras_require'] = {
         'pytest-timeout',
         'pytest-tornado5',
         'jsonschema',
-        'mock',
-        'requests',
         'tabulate',  # For profiling
     ],
     'docs': [
@@ -129,14 +124,9 @@ extras_require = setuptools_args['extras_require'] = {
         'recommonmark',
         'sphinx_rtd_theme'
     ],
-
-    ':python_version == "2.7"': [
-        'backports.shutil_which',
-        'backports.functools_lru_cache',
-    ],
 }
 
-setuptools_args['python_requires'] = '>=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*'
+setuptools_args['python_requires'] = '>=3.4'
 
 if 'setuptools' in sys.modules:
     setup_args.update(setuptools_args)

@@ -1,7 +1,6 @@
 
 import io
 import os
-from six import StringIO
 
 import nbformat
 
@@ -103,6 +102,6 @@ def test_apply_filter_valid_filter(git_repo):
         f.write(u'\n*.ipynb\tfilter=myfilter\n')
     call('git config --local --add filter.myfilter.clean "cat"')
     f = apply_possible_filter(path)
-    assert isinstance(f, StringIO)
+    assert isinstance(f, io.StringIO)
     # Read validates notebook:
     nbformat.validate(nbformat.read(f, as_version=4))

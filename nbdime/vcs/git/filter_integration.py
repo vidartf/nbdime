@@ -2,12 +2,10 @@
 import io
 from subprocess import check_output, STDOUT, CalledProcessError
 
-from six import StringIO
-
 from nbdime.utils import EXPLICIT_MISSING_FILE
 
 
-class NamedStringIO(StringIO):
+class NamedStringIO(io.StringIO):
     name = ''
 
 
