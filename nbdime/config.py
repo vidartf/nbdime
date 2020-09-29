@@ -16,8 +16,11 @@ from .merging.notebooks import (
 
 class NbdimeConfigurable(HasTraits):
 
-    def configured_traits(self, cls):
-        traits = cls.class_own_traits(config=True)
+    def configured_traits(self, cls=None):
+        if cls is None:
+            traits = self.traits(config=True)
+        else:
+            traits = cls.class_own_traits(config=True)
         c = {}
         for name, _ in traits.items():
             c[name] = getattr(self, name)
@@ -86,13 +89,18 @@ def build_config(entrypoint, include_none=False):
     for c in _load_config_files('nbdime_config', path=path):
         recursive_update(disk_config, c, include_none)
 
-    config = {}
     configurable = entrypoint_configurables[entrypoint]
+
+    # Populate config object with defaults from trait definitions
+    config = config_instance(configurable).configured_traits()
+    all_names = tuple(config.keys())
+    # Merge in the corresponding disk config values in reverse MRO order
     for c in reversed(configurable.mro()):
-        if issubclass(c, NbdimeConfigurable):
-            recursive_update(config, config_instance(c).configured_traits(c), include_none)
-            if (c.__name__ in disk_config):
-                recursive_update(config, disk_config[c.__name__], include_none)
+        if issubclass(c, NbdimeConfigurable) and c.__name__ in disk_config:
+            recursive_update(
+                config,
+                {k:v for k,v in disk_config[c.__name__].items() if k in all_names},
+                include_none)
 
     return config
 
@@ -110,7 +118,7 @@ class Global(NbdimeConfigurable):
     ).tag(config=True)
 
 
-class Web(NbdimeConfigurable):
+class Web(Global):
 
     port = Integer(
         0,
@@ -167,7 +175,7 @@ class IgnoreConfig(Dict):
         return self.klass(value)
 
 
-class _Ignorables(NbdimeConfigurable):
+class _Ignorables(Global):
 
     sources = Bool(
         None,

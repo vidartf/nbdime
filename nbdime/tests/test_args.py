@@ -147,3 +147,10 @@ def test_config_inherit(entrypoint_ignore_config, tmpdir, reset_notebook_diff):
         parsed = parser.parse_args([])
 
     assert parsed.metadata is False
+
+
+# TODO: Add some tests for new config resolution ordering
+# - No unknown values gets included
+# - Overridden trait defaults are used
+# - Any applicable disk config always overrides defaults (CHANGED, previously
+#   overridden defaults overwrote less specific disk config)
